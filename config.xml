@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.chatore.admin" version="1.0.0"
+        xmlns="http://www.w3.org/ns/widgets"
+        xmlns:cdv="http://cordova.apache.org/ns/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>Chatore Sathi Cafe</name>
+    <description>
+        Chatore Sathi Cafe: Order Now!
+    </description>
+    <author email="support@chatoresathi.com" href="https://chatoresathi.com">
+        Chatore Sathi Cafe
+    </author>
+    <content src="index.html" />
+    <plugin name="cordova-plugin-inappbrowser" spec="^5.0.0" />
+
+    <!-- Network requests (XHR/fetch) allowed everywhere -->
+    <access origin="*" />
+
+    <!-- Sirf apni site WebView ke andar khulegi.
+         Baaki har link (Google login, WhatsApp, etc.) external browser/app mein khulega. -->
+    <allow-navigation href="https://menu-api-arv5.onrender.com/*" />
+    <allow-navigation href="https://chatoresathi.com/*" />
+
+    <!-- External open ki permission -->
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="intent:*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+    <allow-intent href="whatsapp:*" />
+
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="android-minSdkVersion" value="22" />
+    <preference name="android-targetSdkVersion" value="34" />
+    <preference name="Orientation" value="portrait" />
+    <preference name="Fullscreen" value="false" />
+    <preference name="StatusBarOverlaysWebView" value="false" />
+    <preference name="StatusBarBackgroundColor" value="#2b1a00" />
+    <preference name="StatusBarStyle" value="lightcontent" />
+    <preference name="AndroidWindowSplashScreenBackground" value="#2b1a00" />
+    <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/splash/splash_icon.png" />
+    <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#2b1a00" />
+
+    <platform name="android">
+        <allow-intent href="market:*" />
+        <icon density="ldpi" src="res/icon/android/ldpi.png" />
+        <icon density="mdpi" src="res/icon/android/mdpi.png" />
+        <icon density="hdpi" src="res/icon/android/hdpi.png" />
+        <icon density="xhdpi" src="res/icon/android/xhdpi.png" />
+        <icon density="xxhdpi" src="res/icon/android/xxhdpi.png" />
+        <icon density="xxxhdpi" src="res/icon/android/xxxhdpi.png" />
+
+        <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+            <application android:usesCleartextTraffic="true" />
+        </edit-config>
+
+        <!-- Login ke baad browser se app wapas khule (singleTask = wahi app instance reuse hoga) -->
+        <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application/activity[@android:name='MainActivity']">
+            <activity android:launchMode="singleTask" />
+        </edit-config>
+
+        <!-- chatore://done deep link -->
+        <config-file target="AndroidManifest.xml" parent="/manifest/application/activity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="chatore" android:host="done" />
+            </intent-filter>
+        </config-file>
+    </platform>
+</widget>

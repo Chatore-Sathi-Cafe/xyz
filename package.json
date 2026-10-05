@@ -1,0 +1,19 @@
+{
+  "name": "chatore-sathi-cafe",
+  "displayName": "Chatore Sathi Admin",
+  "version": "1.0.0",
+  "description": "Chatore Sathi Cafe: Order Now!",
+  "main": "index.js",
+  "scripts": {
+    "build": "cordova build android"
+  },
+  "cordova": {
+    "platforms": [
+      "android"
+    ],
+    "plugins": {}
+  },
+  "devDependencies": {
+    "cordova-android": "^13.0.0"
+  }
+}
