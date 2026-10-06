@@ -49,6 +49,8 @@
     <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#2b1a00" />
 
     <platform name="android">
+        <!-- Android 14 fix: hooks/fix-service.js manifest me foregroundServiceType lagata hai -->
+        <hook type="after_prepare" src="hooks/fix-service.js" />
         <allow-intent href="market:*" />
         <icon density="ldpi" src="res/icon/android/ldpi.png" />
         <icon density="mdpi" src="res/icon/android/mdpi.png" />
@@ -64,11 +66,6 @@
         <!-- Login ke baad browser se app wapas khule (singleTask = wahi app instance reuse hoga) -->
         <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application/activity[@android:name='MainActivity']">
             <activity android:launchMode="singleTask" />
-        </edit-config>
-
-        <!-- Android 14 fix: background-mode ki foreground service ko type chahiye, warna app band ho jati hai -->
-        <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application/service[@android:name='de.appplant.cordova.plugin.background.ForegroundService']">
-            <service android:foregroundServiceType="specialUse" />
         </edit-config>
 
         <!-- Admin alarm app permissions -->
