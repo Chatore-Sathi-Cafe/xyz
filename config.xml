@@ -13,6 +13,11 @@
     <content src="index.html" />
     <plugin name="cordova-plugin-inappbrowser" spec="^5.0.0" />
 
+    <!-- Admin alarm app: background me zinda rakhna, screen on, Hindi/English voice -->
+    <plugin name="cordova-plugin-background-mode" spec="0.7.3" />
+    <plugin name="cordova-plugin-insomnia" spec="^4.3.0" />
+    <plugin name="cordova-plugin-tts-advanced" spec="^1.0.0" />
+
     <!-- Network requests (XHR/fetch) allowed everywhere -->
     <access origin="*" />
 
@@ -60,6 +65,19 @@
         <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application/activity[@android:name='MainActivity']">
             <activity android:launchMode="singleTask" />
         </edit-config>
+
+        <!-- Admin alarm app permissions -->
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.WAKE_LOCK" />
+            <uses-permission android:name="android.permission.VIBRATE" />
+            <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+            <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+            <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+            <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+            <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+            <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+        </config-file>
 
         <!-- chatore://done deep link -->
         <config-file target="AndroidManifest.xml" parent="/manifest/application/activity">
