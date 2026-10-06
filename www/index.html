@@ -102,6 +102,9 @@ function siren(sec){
   o.start(t0);o.stop(t0+sec);
 }
 function speak(text,lang){
+  if(window.TTS&&window.TTS.speak){ // Cordova TTS plugin (zyada reliable)
+    return window.TTS.speak({text:text,locale:lang,rate:0.95}).catch(()=>{});
+  }
   return new Promise(res=>{
     if(!window.speechSynthesis)return res();
     const u=new SpeechSynthesisUtterance(text);
@@ -141,6 +144,20 @@ function stopAlarm(){
 }
 // agar order status change kiya to bhi alarm band
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkAudio();keepAwake()}});
+
+/* ===== CORDOVA: background me zinda rakho ===== */
+document.addEventListener('deviceready',()=>{
+  try{
+    const bm=cordova.plugins.backgroundMode;
+    bm.setDefaults({title:'Chatore Admin',text:'Orders sun raha hai...',silent:false});
+    bm.enable();
+    bm.overrideBackButton();                       // back dabane par app band nahi, background me jayegi
+    bm.on('activate',()=>bm.disableWebViewOptimizations());
+    // pehli baar battery optimization band karne ki screen khulegi
+    if(!localStorage.getItem('batAsked')){localStorage.setItem('batAsked','1');bm.disableBatteryOptimizations()}
+  }catch(e){}
+  try{window.plugins.insomnia.keepAwake()}catch(e){}
+},false);
 
 /* screen on rakho taaki app bg me sleep na ho */
 let wl=null;
