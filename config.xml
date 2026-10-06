@@ -66,6 +66,11 @@
             <activity android:launchMode="singleTask" />
         </edit-config>
 
+        <!-- Android 14 fix: background-mode ki foreground service ko type chahiye, warna app band ho jati hai -->
+        <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application/service[@android:name='de.appplant.cordova.plugin.background.ForegroundService']">
+            <service android:foregroundServiceType="specialUse" />
+        </edit-config>
+
         <!-- Admin alarm app permissions -->
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.INTERNET" />
