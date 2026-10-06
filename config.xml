@@ -16,7 +16,7 @@
     <!-- Admin alarm app: background me zinda rakhna, screen on, Hindi/English voice -->
     <plugin name="cordova-plugin-background-mode" spec="0.7.3" />
     <plugin name="cordova-plugin-insomnia" spec="^4.3.0" />
-    <plugin name="cordova-plugin-tts-advanced" spec="^1.0.0" />
+    <plugin name="cordova-plugin-tts" spec="0.2.3" />
 
     <!-- Network requests (XHR/fetch) allowed everywhere -->
     <access origin="*" />
