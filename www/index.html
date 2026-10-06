@@ -1,44 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Chatore Sathi Cafe</title>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chatore Sathi Admin (Phone)</title>
 <style>
-html,body{margin:0;height:100%;background:#2b1a00;color:#f5e6c0;font-family:Georgia,serif}
-body{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-img{width:160px;height:160px;border-radius:50%;border:4px solid #c8860a;animation:pulse 2s infinite ease-in-out}
-@keyframes pulse{0%{transform:scale(.95);box-shadow:0 0 0 0 rgba(200,134,10,.7)}70%{transform:scale(1);box-shadow:0 0 0 15px rgba(200,134,10,0)}100%{transform:scale(.95);box-shadow:0 0 0 0 rgba(200,134,10,0)}}
-h1{font-size:1.4rem;color:#f5c842;margin:18px 0 14px}
-.bar{width:200px;height:6px;background:#1a1000;border-radius:3px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:#f5c842;animation:ld 2s forwards cubic-bezier(.1,.8,.2,1)}
-@keyframes ld{to{width:100%}}
-#msg{margin-top:18px;font:14px sans-serif;color:#bfa17c;min-height:20px}
-#msg a,#msg button{color:#f5c842;background:none;border:none;font:inherit;text-decoration:underline;cursor:pointer}
-</style>
-</head>
-<body>
-<img src="logo.png" alt="Chatore Sathi Cafe">
-<h1>Chatore Sathi Cafe</h1>
-<div class="bar"><i></i></div>
-<div id="msg"></div>
+*{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
+body{background:#2b1a00;color:#f5e6c0;padding:12px}
+h1{color:#f5c842;font-size:1.2rem}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+input,button{padding:10px;border-radius:8px;border:1px solid #8b5e00;font-size:1rem}
+input{width:100%;margin-bottom:8px;background:#fff8e1;color:#2b1a00}
+button{background:#c8860a;color:#2b1a00;font-weight:700;cursor:pointer}
+#login{max-width:340px;margin:20vh auto}
+#app{display:none}
+.tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.tabs button.on{background:#f5c842}
+.card{background:#3d2200;border:2px solid #8b5e00;border-radius:10px;padding:10px;margin-bottom:10px}
+.card.unseen{border-color:#ff4d4d;box-shadow:0 0 8px #ff4d4d}
+.badge{float:right;padding:2px 8px;border-radius:6px;font-size:.8rem;font-weight:700;background:#555}
+.unseen .badge{background:#ff4d4d}.pending .badge{background:#e69500}.completed .badge{background:#1e6fd9}
+pre{white-space:pre-wrap;font-size:.85rem;margin:6px 0}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+#err{color:#ff8a8a;font-size:.85rem}
+#alarm{display:none;position:fixed;left:0;right:0;top:0;z-index:99;background:#ff4d4d;color:#fff;padding:14px;text-align:center;font-weight:900;font-size:1.1rem;animation:bl .6s infinite alternate}
+#alarm button{margin-top:8px;background:#fff;color:#a00;width:80%}
+#snd{display:none;background:#e69500;color:#2b1a00;text-align:center;padding:10px;border-radius:8px;margin-bottom:10px;font-weight:700}
+@keyframes bl{from{background:#ff4d4d}to{background:#a00}}
+</style></head><body>
+<div id="alarm">🔔 NAYA ORDER MILA!<br><button onclick="stopAlarm()">⏹ Alarm band karo</button></div>
+<div id="login">
+ <h1>🔐 Admin Login</h1><br>
+ <input id="em" type="email" placeholder="Admin email">
+ <input id="pw" type="password" placeholder="Password">
+ <button onclick="login()" style="width:100%">Login</button>
+ <p id="err"></p>
+</div>
+<div id="app">
+ <div class="top"><h1>📦 Orders</h1><button onclick="firebase.auth().signOut()">Logout</button></div>
+ <div id="snd" onclick="unlockAudio(true)">🔊 Sound ON karne ke liye yahan tap karo</div>
+ <div class="tabs" id="tabs"></div>
+ <div id="list"></div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-var TARGET = "https://menu-api-arv5.onrender.com/api/app";
-var MIN_MS = 2000;                 // how long the splash stays visible
-var msg = document.getElementById('msg');
-function go(){ window.location.replace(TARGET); }
-function start(){
-  if (navigator.onLine === false) {
-    msg.innerHTML = 'No internet connection. <button onclick="location.reload()">Retry</button>';
-    window.addEventListener('online', function(){ location.reload(); });
-    return;
-  }
-  setTimeout(go, MIN_MS);
-  setTimeout(function(){
-    msg.innerHTML = 'Taking longer than usual... <a href="' + TARGET + '">Open now</a>';
-  }, 8000);
+firebase.initializeApp({
+  apiKey:"AIzaSyDuHnYIB_tUHlG7V6TmAedonF6v--8CA-k",authDomain:"chatoresathi-web.firebaseapp.com",
+  projectId:"chatoresathi-web",storageBucket:"chatoresathi-web.firebasestorage.app",
+  messagingSenderId:"1013533597631",appId:"1:1013533597631:web:b9acd09c2ae4c6f41c0b0a"
+});
+const auth=firebase.auth(),db=firebase.firestore();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+const STATUSES=['unseen','pending','completed'];
+let filter='all',orders=[],unsub=null,first=true;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function login(){
+  $('err').innerText='';
+  unlockAudio(); // login click = user gesture, audio unlock
+  auth.signInWithEmailAndPassword($('em').value.trim(),$('pw').value)
+   .catch(()=>$('err').innerText='Login failed');
 }
-start();
-</script>
-</body>
-</html>
+auth.onAuthStateChanged(async u=>{
+  if(unsub){unsub();unsub=null}
+  if(!u){$('login').style.display='block';$('app').style.display='none';return}
+  $('login').style.display='none';$('app').style.display='block';
+  renderTabs();keepAwake();checkAudio();
+  first=true;
+  unsub=db.collection('orders').orderBy('createdAt','desc').limit(200).onSnapshot(s=>{
+    if(!first){
+      s.docChanges().forEach(c=>{ if(c.type==='added') startAlarm(); });
+    }
+    first=false;
+    orders=s.docs.map(d=>({id:d.id,...d.data()}));
+    render();
+  },e=>{if(e.code==='permission-denied'){$('err').innerText='This account is not an admin';auth.signOut()}else $('list').innerText='Error: '+e.message});
+});
+
+/* ===== LOUD ALARM + VOICE (lambi beep + "New order received" + "नया ऑर्डर मिला") ===== */
+let ctx=null,alarmOn=false,alarmTimer=null,cycles=0;
+const MAX_CYCLES=12; // ~1 min tak repeat, ya jab tak "Alarm band karo" na dabao
+function unlockAudio(manual){
+  try{
+    if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();
+    if(ctx.state==='suspended')ctx.resume();
+    if(window.speechSynthesis){speechSynthesis.getVoices();}
+    if(manual){const u=new SpeechSynthesisUtterance(' ');speechSynthesis.speak(u);}
+  }catch(e){}
+  checkAudio();
+}
+function checkAudio(){
+  $('snd').style.display=(ctx&&ctx.state==='running')?'none':'block';
+}
+function siren(sec){
+  if(!ctx)return;
+  const g=ctx.createGain();g.gain.value=1;g.connect(ctx.destination);
+  const o=ctx.createOscillator();o.type='square';o.connect(g);
+  const t0=ctx.currentTime;
+  for(let t=0;t<sec;t+=0.3){o.frequency.setValueAtTime((t/0.3)%2?1400:900,t0+t)}
+  o.start(t0);o.stop(t0+sec);
+}
+function speak(text,lang){
+  return new Promise(res=>{
+    if(!window.speechSynthesis)return res();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang=lang;u.volume=1;u.rate=0.95;u.pitch=1;
+    const v=speechSynthesis.getVoices().find(v=>v.lang.replace('_','-').toLowerCase().startsWith(lang.toLowerCase().slice(0,2)));
+    if(v)u.voice=v;
+    u.onend=res;u.onerror=res;
+    speechSynthesis.speak(u);
+    setTimeout(res,5000);
+  });
+}
+function startAlarm(){
+  if(alarmOn){return} // already bajh raha hai
+  alarmOn=true;cycles=0;
+  $('alarm').style.display='block';
+  if(navigator.vibrate)navigator.vibrate([500,200,500,200,500]);
+  loopAlarm();
+}
+async function loopAlarm(){
+  if(!alarmOn)return;
+  if(cycles++>=MAX_CYCLES){stopAlarm();return}
+  try{if(ctx&&ctx.state==='suspended')await ctx.resume()}catch(e){}
+  siren(3);                                   // 3 sec lambi beep
+  await new Promise(r=>setTimeout(r,3100));
+  if(!alarmOn)return;
+  await speak('New order received','en-IN');
+  if(!alarmOn)return;
+  await speak('नया ऑर्डर मिला','hi-IN');
+  if(!alarmOn)return;
+  alarmTimer=setTimeout(loopAlarm,500);
+}
+function stopAlarm(){
+  alarmOn=false;clearTimeout(alarmTimer);
+  $('alarm').style.display='none';
+  try{speechSynthesis.cancel()}catch(e){}
+  if(navigator.vibrate)navigator.vibrate(0);
+}
+// agar order status change kiya to bhi alarm band
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkAudio();keepAwake()}});
+
+/* screen on rakho taaki app bg me sleep na ho */
+let wl=null;
+async function keepAwake(){try{if('wakeLock' in navigator)wl=await navigator.wakeLock.request('screen')}catch(e){}}
+
+function renderTabs(){
+  $('tabs').innerHTML=['all',...STATUSES].map(s=>
+   `<button class="${filter===s?'on':''}" onclick="filter='${s}';renderTabs();render()">${s.toUpperCase()}</button>`).join('');
+}
+function render(){
+  const l=orders.filter(o=>filter==='all'||o.status===filter);
+  $('list').innerHTML=l.length?l.map(o=>{
+    const items=(o.items||[]).map(i=>`${esc(i.name)} x${i.qty} = Rs.${i.price*i.qty}`).join('\n');
+    const t=o.createdAt?o.createdAt.toDate().toLocaleString():'';
+    return `<div class="card ${o.status}">
+     <span class="badge">${esc(o.status)}</span>
+     <b>#${esc(o.orderId)}</b> · ${esc(o.type)}<br>
+     👤 ${esc(o.name)} · <a style="color:#f5c842" href="tel:${esc(o.phone)}">📞 ${esc(o.phone)}</a>
+     ${o.address?`<br>📍 ${esc(o.address)}`:''}
+     <pre>${items}</pre>
+     💵 <b>Rs.${o.total}</b> (COD) ${o.note?`<br>📝 ${esc(o.note)}`:''}
+     <br><small>${t}</small>
+     <div class="acts" style="margin-top:8px">${STATUSES.filter(s=>s!==o.status).map(s=>
+      `<button onclick="setStatus('${o.id}','${s}')">→ ${s}</button>`).join('')}<button onclick="del('${o.id}')" style="background:#a22;color:#fff">🗑 Delete</button></div></div>`}).join('')
+   :'<p>No orders</p>';
+}
+function del(id){
+  const o=orders.find(x=>x.id===id);
+  if(confirm('Delete order #'+(o?o.orderId:'')+'? This cannot be undone.'))
+    db.collection('orders').doc(id).delete().catch(e=>alert(e.message));
+}
+function setStatus(id,s){
+  stopAlarm();
+  db.collection('orders').doc(id).update({status:s,updatedAt:firebase.firestore.FieldValue.serverTimestamp()})
+   .catch(e=>alert(e.message));
+}
+</script></body></html>
